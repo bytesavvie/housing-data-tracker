@@ -3,7 +3,10 @@ import * as dotenv from "dotenv"; // see https://github.com/motdotla/dotenv#how-
 dotenv.config();
 
 // fs
-import { writeFileSync } from "fs";
+import { outputFileSync } from "fs-extra";
+
+// path
+import path from "path";
 
 // axios
 import axios from "axios";
@@ -112,8 +115,8 @@ const getStateData = async () => {
     }
 
     for (const [key, value] of Object.entries(stateHash)) {
-      writeFileSync(
-        `metroData/${key}.csv`,
+      outputFileSync(
+        path.join(__dirname, `./metroData/${key}.csv`),
         `${headerRow.join(",")}\r\n${value.join("\r\n")}`
       );
     }
