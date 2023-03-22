@@ -21,3 +21,13 @@ export function csvToArray(text: string) {
   }
   return ret;
 }
+
+export const extractStateFromName = (title: string | undefined) => {
+  if (!title) return;
+
+  let state = title.split(",")[1];
+  if (state) {
+    state = state.trim().slice(0, 2).toLowerCase();
+    return state;
+  }
+};

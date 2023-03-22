@@ -11,6 +11,9 @@ import path from "path";
 // axios
 import axios from "axios";
 
+// utils
+import { csvToArray, extractStateFromName } from "./utils";
+
 /*  Header Fields from csv
 month_date_yyyymm: 202302 -- 0
 cbsa_code: 26820 --  1
@@ -55,40 +58,6 @@ pending_ratio_yy,  39
 quality_flag  40
 */
 
-function csvToArray(text: string) {
-  let p = "",
-    row = [""],
-    i = 0,
-    r = 0,
-    s = !0,
-    l;
-  const ret = [row];
-  for (l of text) {
-    if ('"' === l) {
-      if (s && l === p) row[i] += l;
-      s = !s;
-    } else if ("," === l && s) l = row[++i] = "";
-    else if ("\n" === l && s) {
-      const tempRow = row[i];
-      if ("\r" === p && tempRow) row[i] = tempRow.slice(0, -1);
-      row = ret[++r] = [(l = "")];
-      i = 0;
-    } else row[i] += l;
-    p = l;
-  }
-  return ret;
-}
-
-const extractStateFromCBSATitle = (title: string | undefined) => {
-  if (!title) return;
-
-  let state = title.split(",")[1];
-  if (state) {
-    state = state.trim().slice(0, 2).toLowerCase();
-    return state;
-  }
-};
-
 const getStateData = async () => {
   try {
     const { data } = await axios.get<string>(
@@ -104,7 +73,7 @@ const getStateData = async () => {
       const row = csvArray[i];
 
       if (row) {
-        const stateId = extractStateFromCBSATitle(row[2]);
+        const stateId = extractStateFromName(row[2]);
 
         if (stateId && stateHash[stateId]) {
           stateHash[stateId]?.push(row.join(","));

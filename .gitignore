@@ -44,3 +44,4 @@ yarn-error.log*
 # csv-data
 /data/countyData
 /data/metroData
+/data/zipcodeData

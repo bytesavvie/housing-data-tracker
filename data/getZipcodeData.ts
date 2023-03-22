@@ -16,8 +16,8 @@ import { csvToArray, extractStateFromName } from "./utils";
 
 /*  Header Fields from csv
 month_date_yyyymm: 202302 -- 0
-county_fips: 40023 --  1
-county_name: choctaw, ok --- 2
+postal_code: 98550 --  1
+zip_name: hoquiam, wa --- 2
 median_listing_price: 457500 -- 3
 median_listing_price_mm: 0.0184 -- 4
 median_listing_price_yy: -0.01339 -- 5
@@ -57,10 +57,10 @@ pending_ratio_yy,  38
 quality_flag  39
 */
 
-const getStateData = async () => {
+const getZipcodeData = async () => {
   try {
     const { data } = await axios.get<string>(
-      "https://econdata.s3-us-west-2.amazonaws.com/Reports/Core/RDC_Inventory_Core_Metrics_County_History.csv"
+      "https://econdata.s3-us-west-2.amazonaws.com/Reports/Core/RDC_Inventory_Core_Metrics_Zip_History.csv"
     );
 
     // csvArray.length - 2
@@ -84,7 +84,7 @@ const getStateData = async () => {
 
     for (const [key, value] of Object.entries(stateHash)) {
       outputFileSync(
-        path.join(__dirname, `./countyData/${key}.csv`),
+        path.join(__dirname, `./zipcodeData/${key}.csv`),
         `${headerRow.join(",")}\r\n${value.join("\r\n")}`
       );
     }
@@ -93,6 +93,6 @@ const getStateData = async () => {
   }
 };
 
-getStateData().catch((err) => {
+getZipcodeData().catch((err) => {
   console.error(err);
 });
