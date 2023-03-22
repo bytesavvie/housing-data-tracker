@@ -38,8 +38,8 @@ pending_listing_count,  22
 pending_listing_count_mm,  23
 pending_listing_count_yy,  24
 median_listing_price_per_square_foot,  25
-median_listing_price_per_square_foot_mm  26
-,median_listing_price_per_square_foot_yy,  27
+median_listing_price_per_square_foot_mm,  26
+median_listing_price_per_square_foot_yy,  27
 median_square_feet,  28
 median_square_feet_mm,  29
 median_square_feet_yy,  30
