@@ -3,6 +3,7 @@ import { useState } from "react";
 
 // Next
 import Head from "next/head";
+import { useRouter } from "next/router";
 import { type GetStaticProps, type GetStaticPaths, type NextPage } from "next";
 
 // react-select-search
@@ -10,9 +11,13 @@ import SelectSearch, { type SelectedOptionValue } from "react-select-search";
 
 // Components
 import USMap from "../../components/maps/USMap";
+import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
 
 // Custom Types
-import { type StateDataPoint, type SelectSearchOption } from "~/customTypes";
+import {
+  type SelectSearchOption,
+  type MonthlyInventoryChartDataPoint,
+} from "~/customTypes";
 
 // utils
 import { createS3Client } from "~/utils/s3";
@@ -25,7 +30,7 @@ const nonActiveTabCSS =
   "inline-block w-full cursor-pointer rounded-t-lg border-b-2 border-transparent p-4 text-2xl hover:border-gray-300 hover:text-gray-600 hover:text-gray-300";
 
 interface IProps {
-  stateData: StateDataPoint[];
+  stateData: MonthlyInventoryChartDataPoint[];
   countyOptions: SelectSearchOption[];
   zipcodeOptions: SelectSearchOption[];
 }
@@ -35,6 +40,8 @@ const StatePage: NextPage<IProps> = ({
   countyOptions,
   zipcodeOptions,
 }) => {
+  const router = useRouter();
+
   const [selectedSubCategory, setSelectedSubCategory] = useState<
     "county" | "zipcode"
   >("county");
@@ -82,6 +89,26 @@ const StatePage: NextPage<IProps> = ({
           <div className="m-auto mb-4 max-w-[850px]">
             <USMap />
           </div>
+
+          <section className="mb-16">
+            <h2 className="mb-4 text-center text-3xl text-white">
+              Monthly Inventory Data - {router.query.stateid}
+            </h2>
+            <p className="m-auto mb-6 max-w-xl text-center text-slate-400">
+              The data below shows the values for different housing metrics in
+              the United States. Click on the buttons below to view different
+              metrics in the chart. Data is provided by{" "}
+              <a
+                href="https://www.realtor.com/research/data/"
+                target="_blank"
+                rel="noreferrer"
+                className="text-white"
+              >
+                relator.com
+              </a>
+            </p>
+            <MonthlyInventoryChart chartData={stateData} />
+          </section>
           <section>
             <div className="mb-4 border-b border-gray-200 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400">
               <ul className="-mb-px grid grid-cols-2">
