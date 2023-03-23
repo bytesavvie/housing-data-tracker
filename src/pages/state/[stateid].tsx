@@ -5,7 +5,7 @@ import { useState } from "react";
 import Head from "next/head";
 
 // react-select-search
-import SelectSearch from "react-select-search";
+import SelectSearch, { SelectedOptionValue } from "react-select-search";
 
 // Components
 import USMap from "../../components/maps/USMap";
@@ -45,6 +45,15 @@ const StatePage = () => {
   const [selectedSubCategory, setSelectedSubCategory] = useState<
     "county" | "zipcode"
   >("county");
+  const [selectedCounty, setSelectedCounty] = useState("");
+
+  const handleCountySelect = (
+    selectedValue: SelectedOptionValue | SelectedOptionValue[]
+  ) => {
+    if (typeof selectedValue === "string") {
+      setSelectedCounty(selectedValue);
+    }
+  };
 
   return (
     <>
@@ -114,6 +123,10 @@ const StatePage = () => {
                   options={akCounties}
                   placeholder="Choose County"
                   search
+                  value={selectedCounty}
+                  onChange={(selectedValue) =>
+                    handleCountySelect(selectedValue)
+                  }
                 />
               </div>
             </section>
