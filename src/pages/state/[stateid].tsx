@@ -3,55 +3,57 @@ import { useState } from "react";
 
 // Next
 import Head from "next/head";
+import { type GetStaticProps, type GetStaticPaths, type NextPage } from "next";
 
 // react-select-search
-import SelectSearch, { SelectedOptionValue } from "react-select-search";
+import SelectSearch, { type SelectedOptionValue } from "react-select-search";
 
 // Components
 import USMap from "../../components/maps/USMap";
+
+// Custom Types
+import { type StateDataPoint, type SelectSearchOption } from "~/customTypes";
+
+// utils
+import { createS3Client } from "~/utils/s3";
+import { allStates } from "~/utils/USMap";
+import { getStateChartData, getSelectOptionsList } from "~/utils/statePage";
 
 const activeTabCSS =
   "active inline-block w-full rounded-t-lg border-b-2 border-white border-white p-4 text-2xl text-white text-white";
 const nonActiveTabCSS =
   "inline-block w-full cursor-pointer rounded-t-lg border-b-2 border-transparent p-4 text-2xl hover:border-gray-300 hover:text-gray-600 hover:text-gray-300";
 
-const akCounties = [
-  { name: "anchorage", value: "2020" },
-  { name: "haines", value: "2100" },
-  { name: "fairbanks north star", value: "2090" },
-  { name: "nome", value: "2180" },
-  { name: "matanuska-susitna", value: "2170" },
-  { name: "denali", value: "2068" },
-  { name: "petersburg", value: "2195" },
-  { name: "aleutians west", value: "2016" },
-  { name: "lake and peninsula", value: "2164" },
-  { name: "kodiak island", value: "2150" },
-  { name: "hoonah-angoon", value: "2105" },
-  { name: "bethel", value: "2050" },
-  { name: "skagway", value: "2230" },
-  { name: "juneau", value: "2110" },
-  { name: "wrangell", value: "2275" },
-  { name: "prince of wales-hyder", value: "2198" },
-  { name: "sitka", value: "2220" },
-  { name: "north slope", value: "2185" },
-  { name: "kenai peninsula", value: "2122" },
-  { name: "yukon-koyukuk", value: "2290" },
-  { name: "southeast fairbanks", value: "2240" },
-  { name: "ketchikan gateway", value: "2130" },
-  { name: "dillingham", value: "2070" },
-];
+interface IProps {
+  stateData: StateDataPoint[];
+  countyOptions: SelectSearchOption[];
+  zipcodeOptions: SelectSearchOption[];
+}
 
-const StatePage = () => {
+const StatePage: NextPage<IProps> = ({
+  stateData,
+  countyOptions,
+  zipcodeOptions,
+}) => {
   const [selectedSubCategory, setSelectedSubCategory] = useState<
     "county" | "zipcode"
   >("county");
   const [selectedCounty, setSelectedCounty] = useState("");
+  const [selectedZipcode, setSelectedZipcode] = useState("");
 
   const handleCountySelect = (
     selectedValue: SelectedOptionValue | SelectedOptionValue[]
   ) => {
     if (typeof selectedValue === "string") {
       setSelectedCounty(selectedValue);
+    }
+  };
+
+  const handleZipcodeSelect = (
+    selectedValue: SelectedOptionValue | SelectedOptionValue[]
+  ) => {
+    if (typeof selectedValue === "string") {
+      setSelectedZipcode(selectedValue);
     }
   };
 
@@ -113,21 +115,43 @@ const StatePage = () => {
 
             <section className="min-h-[500px]">
               <div className="m-auto w-1/2">
-                <label
-                  htmlFor="email"
-                  className="mb-2 block text-sm font-medium text-white"
-                >
-                  County
-                </label>
-                <SelectSearch
-                  options={akCounties}
-                  placeholder="Choose County"
-                  search
-                  value={selectedCounty}
-                  onChange={(selectedValue) =>
-                    handleCountySelect(selectedValue)
-                  }
-                />
+                {selectedSubCategory === "county" ? (
+                  <>
+                    <label
+                      htmlFor="county"
+                      className="mb-2 block text-sm font-medium text-white"
+                    >
+                      County
+                    </label>
+                    <SelectSearch
+                      options={countyOptions}
+                      placeholder="Choose County"
+                      search
+                      value={selectedCounty}
+                      onChange={(selectedValue) =>
+                        handleCountySelect(selectedValue)
+                      }
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label
+                      htmlFor="zipcode"
+                      className="mb-2 block text-sm font-medium text-white"
+                    >
+                      Zipcode
+                    </label>
+                    <SelectSearch
+                      options={zipcodeOptions}
+                      placeholder="Choose Zipcode"
+                      search
+                      value={selectedZipcode}
+                      onChange={(selectedValue) =>
+                        handleZipcodeSelect(selectedValue)
+                      }
+                    />
+                  </>
+                )}
               </div>
             </section>
           </section>
@@ -135,6 +159,50 @@ const StatePage = () => {
       </div>
     </>
   );
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  // console.log(context);
+  const stateId = context?.params?.stateid;
+
+  if (typeof stateId !== "string") {
+    return {
+      props: {},
+    };
+  }
+
+  const client = createS3Client();
+  const stateData = await getStateChartData(client, stateId);
+
+  const countyOptions = await getSelectOptionsList(
+    client,
+    stateId,
+    "county-list"
+  );
+  const zipcodeOptions = await getSelectOptionsList(
+    client,
+    stateId,
+    "zipcode-list"
+  );
+
+  return {
+    props: {
+      stateData,
+      countyOptions,
+      zipcodeOptions,
+    },
+  };
+};
+
+export const getStaticPaths: GetStaticPaths = () => {
+  const paths = allStates.map((state) => {
+    return { params: { stateid: state.id } };
+  });
+
+  return {
+    paths,
+    fallback: false, // can also be true or 'blocking'
+  };
 };
 
 export default StatePage;
