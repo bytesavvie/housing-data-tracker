@@ -42,6 +42,6 @@ yarn-error.log*
 *.tsbuildinfo
 
 # csv-data
-/data/countyData
-/data/metroData
-/data/zipcodeData
+/data/county-data
+/data/metro-data
+/data/zipcode-data

@@ -85,7 +85,7 @@ const getStateData = async () => {
 
     for (const [key, value] of Object.entries(stateHash)) {
       outputFileSync(
-        path.join(__dirname, `./metroData/${key}.csv`),
+        path.join(__dirname, `./metro-data/${key}.csv`),
         `${headerRow.join(",")}\r\n${value.join("\r\n")}`
       );
     }
