@@ -45,3 +45,5 @@ yarn-error.log*
 /data/county-data
 /data/metro-data
 /data/zipcode-data
+/data/county-list
+/data/zipcode-list
