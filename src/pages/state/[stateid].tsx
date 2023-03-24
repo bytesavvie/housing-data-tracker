@@ -134,6 +134,18 @@ const StatePage: NextPage<IProps> = ({
     }
   };
 
+  const extractStateNameFromId = () => {
+    const stateId = router.query.stateid;
+
+    if (typeof stateId === "string") {
+      const result = allStates.find((state) => state.id === stateId);
+      if (!result) return "";
+      return result.fullName;
+    }
+
+    return "";
+  };
+
   return (
     <>
       <Head>
@@ -162,7 +174,7 @@ const StatePage: NextPage<IProps> = ({
 
           <section className="mb-16">
             <h2 className="mb-4 text-center text-3xl text-white">
-              Monthly Inventory Data - {router.query.stateid}
+              Monthly Inventory Data - {extractStateNameFromId()}
             </h2>
             <p className="m-auto mb-6 max-w-xl text-center text-slate-400">
               The data below shows the values for different housing metrics in
@@ -181,7 +193,7 @@ const StatePage: NextPage<IProps> = ({
           </section>
           <section className="mb-16">
             <h2 className="mb-4 text-center text-3xl text-white">
-              Trends Over Time - {router.query.stateid}
+              Trends Over Time - {extractStateNameFromId()}
             </h2>
             <p className="m-auto mb-6 max-w-xl text-center text-slate-400">
               The data in this section shows the rate of change of different
@@ -198,7 +210,7 @@ const StatePage: NextPage<IProps> = ({
                 relator.com
               </a>
             </p>
-            <div className="mb-4">
+            <div className="m-auto mb-8 w-1/2">
               <label
                 htmlFor="county"
                 className="mb-2 block text-sm font-medium text-white"
