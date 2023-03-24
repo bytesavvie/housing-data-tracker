@@ -4,11 +4,6 @@ export interface State {
   fullName: string;
 }
 
-export interface StateDataPoint {
-  date: string;
-  medianListingPrice: string;
-}
-
 export interface MonthlyInventoryChartDataPoint {
   date: string; // date
   medianListingPrice: number;
@@ -17,6 +12,34 @@ export interface MonthlyInventoryChartDataPoint {
   totalListingCount: number;
   priceReduced: number;
   squareFeet: number;
+}
+
+export interface ChangeOverTimeChartDataPoint {
+  date: string;
+  medianListingPriceMM: number;
+  medianListingPriceYY: number;
+  activeListingCountMM: number;
+  activeListingCountYY: number;
+  medianDaysOnMarketMM: number;
+  medianDaysOnMarketYY: number;
+  newListingCountMM: number;
+  newListingCountYY: number;
+  priceIncreasedCountMM: number;
+  priceIncreasedCountYY: number;
+  priceReducedCountMM: number;
+  priceReducedCountYY: number;
+  pendingListingCountMM: number;
+  pendingListingCountYY: number;
+  medianListingPricePerSquareFootMM: number;
+  medianListingPricePerSquareFootYY: number;
+  medianSquareFeetMM: number;
+  medianSquareFeetYY: number;
+  averageListingPriceMM: number;
+  averageListingPriceYY: number;
+  totalListingCountMM: number;
+  totalListingCountYY: number;
+  pendingRatioMM: number;
+  pedningRatioYY: number;
 }
 
 export interface DisplayedChartData {

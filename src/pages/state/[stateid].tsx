@@ -17,6 +17,7 @@ import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
 import {
   type SelectSearchOption,
   type MonthlyInventoryChartDataPoint,
+  type ChangeOverTimeChartDataPoint,
 } from "~/customTypes";
 
 // utils
@@ -30,13 +31,15 @@ const nonActiveTabCSS =
   "inline-block w-full cursor-pointer rounded-t-lg border-b-2 border-transparent p-4 text-2xl hover:border-gray-300 hover:text-gray-600 hover:text-gray-300";
 
 interface IProps {
-  stateData: MonthlyInventoryChartDataPoint[];
+  stateInventoryData: MonthlyInventoryChartDataPoint[];
+  stateChangeOverTimeData: ChangeOverTimeChartDataPoint[];
   countyOptions: SelectSearchOption[];
   zipcodeOptions: SelectSearchOption[];
 }
 
 const StatePage: NextPage<IProps> = ({
-  stateData,
+  stateInventoryData,
+  stateChangeOverTimeData,
   countyOptions,
   zipcodeOptions,
 }) => {
@@ -107,7 +110,7 @@ const StatePage: NextPage<IProps> = ({
                 relator.com
               </a>
             </p>
-            <MonthlyInventoryChart chartData={stateData} />
+            <MonthlyInventoryChart chartData={stateInventoryData} />
           </section>
           <section>
             <div className="mb-4 border-b border-gray-200 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400">
@@ -199,7 +202,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
   }
 
   const client = createS3Client();
-  const stateData = await getStateChartData(client, stateId);
+  const { stateInventoryData, stateChangeOverTimeData } =
+    await getStateChartData(client, stateId);
 
   const countyOptions = await getSelectOptionsList(
     client,
@@ -214,7 +218,8 @@ export const getStaticProps: GetStaticProps = async (context) => {
 
   return {
     props: {
-      stateData,
+      stateInventoryData,
+      stateChangeOverTimeData,
       countyOptions,
       zipcodeOptions,
     },
