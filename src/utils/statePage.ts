@@ -77,7 +77,7 @@ export const getStateChartData = async (client: S3Client, stateId: string) => {
         totalListingCountMM: decimalToPercent(row[34] || ""),
         totalListingCountYY: decimalToPercent(row[35] || ""),
         pendingRatioMM: decimalToPercent(row[37] || ""),
-        pedningRatioYY: decimalToPercent(row[38] || ""),
+        pendingRatioYY: decimalToPercent(row[38] || ""),
       });
     }
   }

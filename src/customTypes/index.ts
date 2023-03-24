@@ -39,7 +39,7 @@ export interface ChangeOverTimeChartDataPoint {
   totalListingCountMM: number;
   totalListingCountYY: number;
   pendingRatioMM: number;
-  pedningRatioYY: number;
+  pendingRatioYY: number;
 }
 
 export interface DisplayedChartData {
