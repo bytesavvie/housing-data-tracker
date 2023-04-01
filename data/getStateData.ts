@@ -63,6 +63,8 @@ const getStateData = async () => {
       "https://econdata.s3-us-west-2.amazonaws.com/Reports/Core/RDC_Inventory_Core_Metrics_State_History.csv"
     );
 
+    console.log(data);
+
     const csvArray = csvToArray(data);
     const stateHash: { [key: string]: string[] } = {};
     const headerRow = csvArray[0] || [];

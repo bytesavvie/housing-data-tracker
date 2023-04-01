@@ -1,5 +1,5 @@
 // React
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 // Next
 import Head from "next/head";
@@ -12,6 +12,9 @@ import SelectSearch, {
   type SelectedOption,
 } from "react-select-search";
 
+// axios
+import axios from "axios";
+
 // Components
 import USMap from "../../components/maps/USMap";
 import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
@@ -22,6 +25,7 @@ import {
   type SelectSearchOption,
   type MonthlyInventoryChartDataPoint,
   type ChangeOverTimeChartDataPoint,
+  CountyDataApiResponse,
 } from "~/customTypes";
 
 // utils
@@ -145,6 +149,28 @@ const StatePage: NextPage<IProps> = ({
 
     return "";
   };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const stateId = router.query.stateid;
+
+        if (typeof stateId === "string") {
+          const { data } = await axios.get<CountyDataApiResponse>(
+            `/api/housing-data?state=${stateId}&county=${selectedCounty}`
+          );
+          console.log(data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (selectedCounty) {
+      void fetchData();
+    }
+    console.log(selectedCounty);
+  }, [selectedCounty]);
 
   return (
     <>

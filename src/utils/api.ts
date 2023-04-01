@@ -1,8 +1,9 @@
 // @aws-sdk/client-s3
-import { GetObjectCommand, type S3Client } from "@aws-sdk/client-s3";
+import { SelectObjectContentCommand, type S3Client } from "@aws-sdk/client-s3";
 
 // Utils
 import { csvToArray } from "data/utils";
+import { formatMonthlyDate, decimalToPercent } from "./statePage";
 
 // Custom Types
 import {
@@ -11,35 +12,56 @@ import {
   type ChangeOverTimeChartDataPoint,
 } from "~/customTypes";
 
-export const formatMonthlyDate = (date: string) => {
-  const year = date.slice(0, 4);
-  const month = date.slice(4);
-  return `${month}/${year}`;
-};
-
-export const decimalToPercent = (numStr: string) => {
-  const result = Number(numStr) * 100;
-  return Number(result.toFixed(2));
-};
-
-export const getStateChartData = async (client: S3Client, stateId: string) => {
-  const getStateDataCSV = new GetObjectCommand({
+export const getCountyChartData = async (
+  client: S3Client,
+  stateId: string,
+  countyId: string
+) => {
+  const getCountyDataCSV = new SelectObjectContentCommand({
     Bucket: process.env.BUCKET,
-    Key: `state-data/${stateId}.csv`,
+    Key: `county-data/${stateId}.csv`,
+    ExpressionType: "SQL",
+    Expression: `SELECT * FROM S3Object s WHERE s."county_fips" = '${countyId}'`,
+    InputSerialization: {
+      CSV: {
+        FileHeaderInfo: "USE",
+        RecordDelimiter: "\n",
+        FieldDelimiter: ",",
+      },
+      CompressionType: "NONE",
+    },
+    OutputSerialization: {
+      CSV: {
+        RecordDelimiter: "\n",
+        FieldDelimiter: ",",
+      },
+    },
   });
 
-  const stateDataCSVResponse = await client.send(getStateDataCSV);
-  const csvStr = (await stateDataCSVResponse.Body?.transformToString()) || "";
+  const countyDataCSVResponse = await client.send(getCountyDataCSV);
 
-  const stateDataArray = csvToArray(csvStr);
-  const stateInventoryData: MonthlyInventoryChartDataPoint[] = [];
-  const stateChangeOverTimeData: ChangeOverTimeChartDataPoint[] = [];
+  const decoder = new TextDecoder("utf-8");
+  let data = "";
 
-  for (let i = stateDataArray.length - 1; i > 0; i--) {
-    const row = stateDataArray[i];
+  if (countyDataCSVResponse.Payload) {
+    for await (const event of countyDataCSVResponse.Payload) {
+      if (event.Records && event.Records.Payload) {
+        const chunk = event.Records.Payload;
+        const decodedChunk = decoder.decode(chunk, { stream: true });
+        data += decodedChunk;
+      }
+    }
+  }
 
-    if (row) {
-      stateInventoryData.push({
+  const countyDataArray = csvToArray(data);
+  const countyInventoryData: MonthlyInventoryChartDataPoint[] = [];
+  const countyChangeOverTimeData: ChangeOverTimeChartDataPoint[] = [];
+
+  for (let i = countyDataArray.length - 1; i > 0; i--) {
+    const row = countyDataArray[i];
+
+    if (row && row[0]) {
+      countyInventoryData.push({
         date: formatMonthlyDate(row[0] || ""), // date
         medianListingPrice: Number(row[3]),
         medianDaysOnMarket: Number(row[9]),
@@ -52,7 +74,7 @@ export const getStateChartData = async (client: S3Client, stateId: string) => {
 
     // check to make sure percent over time changes are included
     if (row && row[4]) {
-      stateChangeOverTimeData.push({
+      countyChangeOverTimeData.push({
         date: formatMonthlyDate(row[0] || ""),
         medianListingPriceMM: decimalToPercent(row[4]),
         medianListingPriceYY: decimalToPercent(row[5] || ""),
@@ -82,21 +104,8 @@ export const getStateChartData = async (client: S3Client, stateId: string) => {
     }
   }
 
-  return { stateInventoryData, stateChangeOverTimeData };
-};
-
-export const getSelectOptionsList: (
-  client: S3Client,
-  stateId: string,
-  listName: "county-list" | "zipcode-list"
-) => Promise<SelectSearchOption[]> = async (client, stateId, listName) => {
-  const getListOptions = new GetObjectCommand({
-    Bucket: process.env.BUCKET,
-    Key: `${listName}/${stateId}.json`,
-  });
-
-  const listResponse = await client.send(getListOptions);
-  const listJSONStr = (await listResponse.Body?.transformToString()) || "";
-  const options = JSON.parse(listJSONStr) as SelectSearchOption[];
-  return options;
+  return {
+    countyInventoryData,
+    countyChangeOverTimeData,
+  };
 };
