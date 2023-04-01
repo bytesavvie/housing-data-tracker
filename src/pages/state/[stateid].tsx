@@ -100,6 +100,18 @@ const StatePage: NextPage<IProps> = ({
   );
   const [selectedCounty, setSelectedCounty] = useState("");
   const [selectedZipcode, setSelectedZipcode] = useState("");
+  const [countyInventoryData, setCountyInvertoryData] = useState<
+    MonthlyInventoryChartDataPoint[]
+  >([]);
+  const [countyChangeOverTimeData, setCountyChangeOverTimeData] = useState<
+    ChangeOverTimeChartDataPoint[]
+  >([]);
+  const [selectedCountyMetric, setSelectedCountyMetric] = useState<
+    keyof ChangeOverTimeChartDataPoint
+  >("medianListingPriceYY");
+  const [selectedCountyMetricName, setSelectedCountyMetricName] = useState(
+    "Median Listing Price (Y/Y)"
+  );
 
   const handleMetricSelect = (
     selectedValue: SelectedOptionValue | SelectedOptionValue[],
@@ -119,6 +131,27 @@ const StatePage: NextPage<IProps> = ({
 
     if (!Array.isArray(selectedOption)) {
       setSelectedMetricName(selectedOption.name);
+    }
+  };
+
+  const handleCountyMetricSelect = (
+    selectedValue: SelectedOptionValue | SelectedOptionValue[],
+    selectedOption: SelectedOption | SelectedOption[]
+  ) => {
+    const row = countyChangeOverTimeData[0];
+
+    if (
+      typeof selectedValue === "string" &&
+      row &&
+      row.hasOwnProperty(selectedValue) &&
+      selectedOption
+    ) {
+      const checkedValue = selectedValue as keyof ChangeOverTimeChartDataPoint;
+      setSelectedCountyMetric(checkedValue);
+    }
+
+    if (!Array.isArray(selectedOption)) {
+      setSelectedCountyMetricName(selectedOption.name);
     }
   };
 
@@ -150,6 +183,15 @@ const StatePage: NextPage<IProps> = ({
     return "";
   };
 
+  const extractCountyNameFromId = () => {
+    const result = countyOptions.find(
+      (county) => county.value === selectedCounty
+    );
+
+    if (result) return result.name;
+    return "";
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -159,6 +201,8 @@ const StatePage: NextPage<IProps> = ({
           const { data } = await axios.get<CountyDataApiResponse>(
             `/api/housing-data?state=${stateId}&county=${selectedCounty}`
           );
+          setCountyInvertoryData(data.countyInventoryData);
+          setCountyChangeOverTimeData(data.countyChangeOverTimeData);
           console.log(data);
         }
       } catch (err) {
@@ -169,8 +213,7 @@ const StatePage: NextPage<IProps> = ({
     if (selectedCounty) {
       void fetchData();
     }
-    console.log(selectedCounty);
-  }, [selectedCounty]);
+  }, [selectedCounty, router.query.stateid]);
 
   return (
     <>
@@ -261,79 +304,121 @@ const StatePage: NextPage<IProps> = ({
               barColor="#34d399"
             />
           </section>
-          <section>
-            <div className="mb-4 border-b border-gray-200 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400">
-              <ul className="-mb-px grid grid-cols-2">
-                <li
-                  className="mr-2"
-                  onClick={() => setSelectedSubCategory("county")}
-                >
-                  <h2
-                    className={
-                      selectedSubCategory === "county"
-                        ? activeTabCSS
-                        : nonActiveTabCSS
-                    }
-                  >
-                    County Data
-                  </h2>
-                </li>
-                <li onClick={() => setSelectedSubCategory("zipcode")}>
-                  <h2
-                    className={
-                      selectedSubCategory === "zipcode"
-                        ? activeTabCSS
-                        : nonActiveTabCSS
-                    }
-                  >
-                    Zipcode Data
-                  </h2>
-                </li>
-              </ul>
-            </div>
 
-            <section className="min-h-[500px]">
-              <div className="m-auto w-1/2">
-                {selectedSubCategory === "county" ? (
+          <div className="mb-4 border-b border-gray-200 text-center text-sm font-medium text-gray-500 dark:border-gray-700 dark:text-gray-400">
+            <ul className="-mb-px grid grid-cols-2">
+              <li
+                className="mr-2"
+                onClick={() => setSelectedSubCategory("county")}
+              >
+                <h2
+                  className={
+                    selectedSubCategory === "county"
+                      ? activeTabCSS
+                      : nonActiveTabCSS
+                  }
+                >
+                  County Data
+                </h2>
+              </li>
+              <li onClick={() => setSelectedSubCategory("zipcode")}>
+                <h2
+                  className={
+                    selectedSubCategory === "zipcode"
+                      ? activeTabCSS
+                      : nonActiveTabCSS
+                  }
+                >
+                  Zipcode Data
+                </h2>
+              </li>
+            </ul>
+          </div>
+
+          <div className="min-h-[500px]">
+            {selectedSubCategory === "county" ? (
+              <>
+                <div className="m-auto mb-16 w-1/2">
+                  <label
+                    htmlFor="county"
+                    className="mb-2 block text-sm font-medium text-white"
+                  >
+                    County
+                  </label>
+                  <SelectSearch
+                    options={countyOptions}
+                    placeholder="Choose County"
+                    search
+                    value={selectedCounty}
+                    onChange={(selectedValue) =>
+                      handleCountySelect(selectedValue)
+                    }
+                  />
+                </div>
+                {selectedCounty && countyInventoryData.length > 0 && (
                   <>
-                    <label
-                      htmlFor="county"
-                      className="mb-2 block text-sm font-medium text-white"
-                    >
-                      County
-                    </label>
-                    <SelectSearch
-                      options={countyOptions}
-                      placeholder="Choose County"
-                      search
-                      value={selectedCounty}
-                      onChange={(selectedValue) =>
-                        handleCountySelect(selectedValue)
-                      }
-                    />
-                  </>
-                ) : (
-                  <>
-                    <label
-                      htmlFor="zipcode"
-                      className="mb-2 block text-sm font-medium text-white"
-                    >
-                      Zipcode
-                    </label>
-                    <SelectSearch
-                      options={zipcodeOptions}
-                      placeholder="Choose Zipcode"
-                      search
-                      value={selectedZipcode}
-                      onChange={(selectedValue) =>
-                        handleZipcodeSelect(selectedValue)
-                      }
-                    />
+                    <section className="mb-16">
+                      <h2 className="mb-4 text-center text-3xl text-white">
+                        County Inventory Data - {extractCountyNameFromId()}
+                      </h2>
+
+                      <MonthlyInventoryChart chartData={countyInventoryData} />
+                    </section>
+                    <section>
+                      <h2 className="mb-4 text-center text-3xl text-white">
+                        Trends Over Time - {extractCountyNameFromId()}
+                      </h2>
+                      <div className="m-auto mb-8 w-1/2">
+                        <label
+                          htmlFor="county"
+                          className="mb-2 block text-sm font-medium text-white"
+                        >
+                          Metric
+                        </label>
+                        <SelectSearch
+                          options={changeOverTimeMetrics}
+                          placeholder="Select Metric"
+                          search
+                          value={selectedCountyMetric}
+                          onChange={(selectedValue, selectedOption) =>
+                            handleCountyMetricSelect(
+                              selectedValue,
+                              selectedOption
+                            )
+                          }
+                        />
+                      </div>
+                      <PercentBarChart
+                        containerClasses="lg:h-[450px] h-[400px]"
+                        chartData={countyChangeOverTimeData}
+                        dataKey={selectedCountyMetric}
+                        barName={selectedCountyMetricName}
+                        barColor="#34d399"
+                      />
+                    </section>
                   </>
                 )}
-              </div>
-            </section>
-          </section>
+              </>
+            ) : (
+              <>
+                <label
+                  htmlFor="zipcode"
+                  className="mb-2 block text-sm font-medium text-white"
+                >
+                  Zipcode
+                </label>
+                <SelectSearch
+                  options={zipcodeOptions}
+                  placeholder="Choose Zipcode"
+                  search
+                  value={selectedZipcode}
+                  onChange={(selectedValue) =>
+                    handleZipcodeSelect(selectedValue)
+                  }
+                />
+              </>
+            )}
+          </div>
         </main>
       </div>
     </>
