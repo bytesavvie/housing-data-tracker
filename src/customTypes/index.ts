@@ -42,9 +42,9 @@ export interface ChangeOverTimeChartDataPoint {
   pendingRatioYY: number;
 }
 
-export interface CountyDataApiResponse {
-  countyInventoryData: MonthlyInventoryChartDataPoint[];
-  countyChangeOverTimeData: ChangeOverTimeChartDataPoint[];
+export interface dataApiResponse {
+  inventoryData: MonthlyInventoryChartDataPoint[];
+  changeOverTimeData: ChangeOverTimeChartDataPoint[];
 }
 
 export interface DisplayedChartData {

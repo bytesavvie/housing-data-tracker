@@ -19,60 +19,26 @@ import axios from "axios";
 import USMap from "../../components/maps/USMap";
 import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
 import PercentBarChart from "~/components/charts/PercentBarChart";
+import ChartDataSection from "~/components/ui/ChartDataSection";
 
 // Custom Types
-import {
-  type SelectSearchOption,
-  type MonthlyInventoryChartDataPoint,
-  type ChangeOverTimeChartDataPoint,
-  CountyDataApiResponse,
+import type {
+  SelectSearchOption,
+  MonthlyInventoryChartDataPoint,
+  ChangeOverTimeChartDataPoint,
+  dataApiResponse,
 } from "~/customTypes";
 
 // utils
 import { createS3Client } from "~/utils/s3";
 import { allStates } from "~/utils/USMap";
 import { getStateChartData, getSelectOptionsList } from "~/utils/statePage";
+import { changeOverTimeMetrics } from "../../components/ui/ChartDataSection";
 
 const activeTabCSS =
   "active inline-block w-full rounded-t-lg border-b-2 border-white border-white p-4 text-2xl text-white text-white";
 const nonActiveTabCSS =
   "inline-block w-full cursor-pointer rounded-t-lg border-b-2 border-transparent p-4 text-2xl hover:border-gray-300 hover:text-gray-600 hover:text-gray-300";
-
-const changeOverTimeMetrics: {
-  value: keyof ChangeOverTimeChartDataPoint;
-  name: string;
-}[] = [
-  { value: "medianListingPriceMM", name: "Median Listing Price (M/M)" },
-  { value: "medianListingPriceYY", name: "Median Listing Price (Y/Y)" },
-  { value: "activeListingCountMM", name: "Active Listing Count (M/M)" },
-  { value: "activeListingCountYY", name: "Active Listing Count (Y/Y)" },
-  { value: "medianDaysOnMarketMM", name: "Median Days On Market (M/M)" },
-  { value: "medianDaysOnMarketYY", name: "Median Days On Market (Y/Y)" },
-  { value: "newListingCountMM", name: "New Listing Count (M/M)" },
-  { value: "newListingCountYY", name: "New Listing Count (Y/Y)" },
-  { value: "priceIncreasedCountMM", name: "Price Increased Count (M/M)" },
-  { value: "priceIncreasedCountYY", name: "Price Increased Count (Y/Y)" },
-  { value: "priceReducedCountMM", name: "Price Reduced Count (M/M)" },
-  { value: "priceReducedCountYY", name: "Price Reduced Count (Y/Y)" },
-  { value: "pendingListingCountMM", name: "Pending Listing Count (M/M)" },
-  { value: "pendingListingCountYY", name: "Pending Listing Count (Y/Y)" },
-  {
-    value: "medianListingPricePerSquareFootMM",
-    name: "Median Listing Price Per Sqft (M/M)",
-  },
-  {
-    value: "medianListingPricePerSquareFootYY",
-    name: "Median Listing Price Per Sqft  (Y/Y)",
-  },
-  { value: "medianSquareFeetMM", name: "Median Sqft (M/M)" },
-  { value: "medianSquareFeetYY", name: "Median Sqft (Y/Y)" },
-  { value: "averageListingPriceMM", name: "Average Listing Price (M/M)" },
-  { value: "averageListingPriceYY", name: "Average Listing Price (Y/Y)" },
-  { value: "totalListingCountMM", name: "Total Lisiting Count (M/M)" },
-  { value: "totalListingCountYY", name: "Total Lisiting Count (Y/Y)" },
-  { value: "pendingRatioMM", name: "Pending Ratio (M/M)" },
-  { value: "pendingRatioYY", name: "Pending Ratio (Y/Y)" },
-];
 
 interface IProps {
   stateInventoryData: MonthlyInventoryChartDataPoint[];
@@ -92,45 +58,46 @@ const StatePage: NextPage<IProps> = ({
   const [selectedSubCategory, setSelectedSubCategory] = useState<
     "county" | "zipcode"
   >("county");
-  const [selectedMetric, setSelectedMetric] = useState<
-    keyof ChangeOverTimeChartDataPoint
-  >("medianListingPriceYY");
-  const [selectedMetricName, setSelectedMetricName] = useState(
-    "Median Listing Price (Y/Y)"
-  );
+  const [selectedStateMetric, setSelectedStateMetric] =
+    useState<SelectedOption>({
+      index: 1,
+      name: "Median Listing Price (Y/Y)",
+      value: "medianListingPriceYY",
+    });
+
   const [selectedCounty, setSelectedCounty] = useState("");
   const [selectedZipcode, setSelectedZipcode] = useState("");
-  const [countyInventoryData, setCountyInvertoryData] = useState<
+  const [selectedCountyMetric, setSelectedCountyMetric] =
+    useState<SelectedOption>({
+      index: 1,
+      name: "Median Listing Price (Y/Y)",
+      value: "medianListingPriceYY",
+    });
+  const [countyInventoryData, setCountyInventoryData] = useState<
     MonthlyInventoryChartDataPoint[]
   >([]);
   const [countyChangeOverTimeData, setCountyChangeOverTimeData] = useState<
     ChangeOverTimeChartDataPoint[]
   >([]);
-  const [selectedCountyMetric, setSelectedCountyMetric] = useState<
-    keyof ChangeOverTimeChartDataPoint
-  >("medianListingPriceYY");
-  const [selectedCountyMetricName, setSelectedCountyMetricName] = useState(
-    "Median Listing Price (Y/Y)"
-  );
+  const [selectedZipcodeMetric, setSelectedZipcodeMetric] =
+    useState<SelectedOption>({
+      index: 1,
+      name: "Median Listing Price (Y/Y)",
+      value: "medianListingPriceYY",
+    });
+  const [zipcodeInventoryData, setZipcodeInventoryData] = useState<
+    MonthlyInventoryChartDataPoint[]
+  >([]);
+  const [zipcodeChangeOverTimeData, setZipcodeChangeOverTimeData] = useState<
+    ChangeOverTimeChartDataPoint[]
+  >([]);
 
   const handleMetricSelect = (
     selectedValue: SelectedOptionValue | SelectedOptionValue[],
     selectedOption: SelectedOption | SelectedOption[]
   ) => {
-    const row = stateChangeOverTimeData[0];
-
-    if (
-      typeof selectedValue === "string" &&
-      row &&
-      row.hasOwnProperty(selectedValue) &&
-      selectedOption
-    ) {
-      const checkedValue = selectedValue as keyof ChangeOverTimeChartDataPoint;
-      setSelectedMetric(checkedValue);
-    }
-
     if (!Array.isArray(selectedOption)) {
-      setSelectedMetricName(selectedOption.name);
+      setSelectedStateMetric(selectedOption);
     }
   };
 
@@ -138,20 +105,17 @@ const StatePage: NextPage<IProps> = ({
     selectedValue: SelectedOptionValue | SelectedOptionValue[],
     selectedOption: SelectedOption | SelectedOption[]
   ) => {
-    const row = countyChangeOverTimeData[0];
-
-    if (
-      typeof selectedValue === "string" &&
-      row &&
-      row.hasOwnProperty(selectedValue) &&
-      selectedOption
-    ) {
-      const checkedValue = selectedValue as keyof ChangeOverTimeChartDataPoint;
-      setSelectedCountyMetric(checkedValue);
-    }
-
     if (!Array.isArray(selectedOption)) {
-      setSelectedCountyMetricName(selectedOption.name);
+      setSelectedCountyMetric(selectedOption);
+    }
+  };
+
+  const handleZipcodeMetricSelect = (
+    selectedValue: SelectedOptionValue | SelectedOptionValue[],
+    selectedOption: SelectedOption | SelectedOption[]
+  ) => {
+    if (!Array.isArray(selectedOption)) {
+      setSelectedZipcodeMetric(selectedOption);
     }
   };
 
@@ -193,16 +157,16 @@ const StatePage: NextPage<IProps> = ({
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCountyData = async () => {
       try {
         const stateId = router.query.stateid;
 
         if (typeof stateId === "string") {
-          const { data } = await axios.get<CountyDataApiResponse>(
+          const { data } = await axios.get<dataApiResponse>(
             `/api/housing-data?state=${stateId}&county=${selectedCounty}`
           );
-          setCountyInvertoryData(data.countyInventoryData);
-          setCountyChangeOverTimeData(data.countyChangeOverTimeData);
+          setCountyInventoryData(data.inventoryData);
+          setCountyChangeOverTimeData(data.changeOverTimeData);
           console.log(data);
         }
       } catch (err) {
@@ -211,9 +175,32 @@ const StatePage: NextPage<IProps> = ({
     };
 
     if (selectedCounty) {
-      void fetchData();
+      void fetchCountyData();
     }
   }, [selectedCounty, router.query.stateid]);
+
+  useEffect(() => {
+    const fetchZipcodeData = async () => {
+      try {
+        const stateId = router.query.stateid;
+
+        if (typeof stateId === "string") {
+          const { data } = await axios.get<dataApiResponse>(
+            `/api/housing-data?state=${stateId}&zipcode=${selectedZipcode}`
+          );
+          setZipcodeInventoryData(data.inventoryData);
+          setZipcodeChangeOverTimeData(data.changeOverTimeData);
+          console.log(data);
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+
+    if (selectedZipcode) {
+      void fetchZipcodeData();
+    }
+  }, [selectedZipcode, router.query.stateid]);
 
   return (
     <>
@@ -226,7 +213,7 @@ const StatePage: NextPage<IProps> = ({
         <link rel="icon" href="/logo.ico" />
       </Head>
       <div className="px-2 sm:px-4">
-        <main className="container relative mx-auto pb-4">
+        <main className="container relative mx-auto pb-8">
           <div className="mt-16 w-full text-center md:absolute md:mt-24">
             <h2 className="mb-4 text-center text-3xl text-white">
               Monthly Inventory Data By State
@@ -279,7 +266,7 @@ const StatePage: NextPage<IProps> = ({
                 relator.com
               </a>
             </p>
-            <div className="m-auto mb-8 w-1/2">
+            <div className="m-auto mb-8 max-w-md">
               <label
                 htmlFor="county"
                 className="mb-2 block text-sm font-medium text-white"
@@ -290,7 +277,7 @@ const StatePage: NextPage<IProps> = ({
                 options={changeOverTimeMetrics}
                 placeholder="Select Metric"
                 search
-                value={selectedMetric}
+                value={selectedStateMetric.value as string}
                 onChange={(selectedValue, selectedOption) =>
                   handleMetricSelect(selectedValue, selectedOption)
                 }
@@ -299,8 +286,10 @@ const StatePage: NextPage<IProps> = ({
             <PercentBarChart
               containerClasses="lg:h-[450px] h-[400px]"
               chartData={stateChangeOverTimeData}
-              dataKey={selectedMetric}
-              barName={selectedMetricName}
+              dataKey={
+                selectedStateMetric.value as keyof ChangeOverTimeChartDataPoint
+              }
+              barName={selectedStateMetric.name}
               barColor="#34d399"
             />
           </section>
@@ -338,7 +327,7 @@ const StatePage: NextPage<IProps> = ({
           <div className="min-h-[500px]">
             {selectedSubCategory === "county" ? (
               <>
-                <div className="m-auto mb-16 w-1/2">
+                <div className="m-auto mb-16 max-w-md">
                   <label
                     htmlFor="county"
                     className="mb-2 block text-sm font-medium text-white"
@@ -356,66 +345,45 @@ const StatePage: NextPage<IProps> = ({
                   />
                 </div>
                 {selectedCounty && countyInventoryData.length > 0 && (
-                  <>
-                    <section className="mb-16">
-                      <h2 className="mb-4 text-center text-3xl text-white">
-                        County Inventory Data - {extractCountyNameFromId()}
-                      </h2>
-
-                      <MonthlyInventoryChart chartData={countyInventoryData} />
-                    </section>
-                    <section>
-                      <h2 className="mb-4 text-center text-3xl text-white">
-                        Trends Over Time - {extractCountyNameFromId()}
-                      </h2>
-                      <div className="m-auto mb-8 w-1/2">
-                        <label
-                          htmlFor="county"
-                          className="mb-2 block text-sm font-medium text-white"
-                        >
-                          Metric
-                        </label>
-                        <SelectSearch
-                          options={changeOverTimeMetrics}
-                          placeholder="Select Metric"
-                          search
-                          value={selectedCountyMetric}
-                          onChange={(selectedValue, selectedOption) =>
-                            handleCountyMetricSelect(
-                              selectedValue,
-                              selectedOption
-                            )
-                          }
-                        />
-                      </div>
-                      <PercentBarChart
-                        containerClasses="lg:h-[450px] h-[400px]"
-                        chartData={countyChangeOverTimeData}
-                        dataKey={selectedCountyMetric}
-                        barName={selectedCountyMetricName}
-                        barColor="#34d399"
-                      />
-                    </section>
-                  </>
+                  <ChartDataSection
+                    inventoryDataTitle={`County Inventory Data - ${extractCountyNameFromId()}`}
+                    trendOverTimeTitle={`Trends Over Time - ${extractCountyNameFromId()}`}
+                    inventoryData={countyInventoryData}
+                    changeOverTimeData={countyChangeOverTimeData}
+                    selectedMetric={selectedCountyMetric}
+                    handleMetricChange={handleCountyMetricSelect}
+                  />
                 )}
               </>
             ) : (
               <>
-                <label
-                  htmlFor="zipcode"
-                  className="mb-2 block text-sm font-medium text-white"
-                >
-                  Zipcode
-                </label>
-                <SelectSearch
-                  options={zipcodeOptions}
-                  placeholder="Choose Zipcode"
-                  search
-                  value={selectedZipcode}
-                  onChange={(selectedValue) =>
-                    handleZipcodeSelect(selectedValue)
-                  }
-                />
+                <div className="m-auto mb-16 max-w-md">
+                  <label
+                    htmlFor="zipcode"
+                    className="mb-2 block text-sm font-medium text-white"
+                  >
+                    Zipcode
+                  </label>
+                  <SelectSearch
+                    options={zipcodeOptions}
+                    placeholder="Choose Zipcode"
+                    search
+                    value={selectedZipcode}
+                    onChange={(selectedValue) =>
+                      handleZipcodeSelect(selectedValue)
+                    }
+                  />
+                </div>
+                {selectedZipcode && zipcodeInventoryData.length > 0 && (
+                  <ChartDataSection
+                    inventoryDataTitle={`Zipcode Inventory Data - ${selectedZipcode}`}
+                    trendOverTimeTitle={`Trends Over Time - ${selectedZipcode}`}
+                    inventoryData={zipcodeInventoryData}
+                    changeOverTimeData={zipcodeChangeOverTimeData}
+                    selectedMetric={selectedZipcodeMetric}
+                    handleMetricChange={handleZipcodeMetricSelect}
+                  />
+                )}
               </>
             )}
           </div>

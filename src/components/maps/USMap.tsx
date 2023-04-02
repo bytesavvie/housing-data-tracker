@@ -75,8 +75,6 @@ const MapChart = () => {
     }
   };
 
-  console.log(router.query);
-
   return (
     <ComposableMap projection="geoAlbersUsa">
       <Geographies geography={geoUrl}>

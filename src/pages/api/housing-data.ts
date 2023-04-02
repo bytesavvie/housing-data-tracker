@@ -2,7 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 
 // utils
-import { getCountyChartData } from "~/utils/api";
+import { s3SelectChartData } from "~/utils/api";
 import { createS3Client } from "~/utils/s3";
 
 export default async function handler(
@@ -15,20 +15,33 @@ export default async function handler(
   }
 
   if (req.method === "GET") {
-    if (req.query) {
+    if (req.query && req.query.state && typeof req.query.state === "string") {
       const client = createS3Client();
 
-      if (
-        req.query.state &&
-        req.query.county &&
-        typeof req.query.state === "string" &&
-        typeof req.query.county === "string"
-      ) {
+      if (req.query.county && typeof req.query.county === "string") {
         try {
-          const result = await getCountyChartData(
+          const result = await s3SelectChartData(
             client,
             req.query.state,
-            req.query.county
+            req.query.county,
+            "county"
+          );
+          res.status(200).json(result);
+          return;
+        } catch (err) {
+          console.log("failed s3 error", err);
+          res.status(500).json({ message: "Unabled to get data." });
+          return;
+        }
+      }
+
+      if (req.query.zipcode && typeof req.query.zipcode === "string") {
+        try {
+          const result = await s3SelectChartData(
+            client,
+            req.query.state,
+            req.query.zipcode,
+            "zipcode"
           );
           res.status(200).json(result);
           return;

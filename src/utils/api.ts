@@ -6,22 +6,25 @@ import { csvToArray } from "data/utils";
 import { formatMonthlyDate, decimalToPercent } from "./statePage";
 
 // Custom Types
-import {
-  type MonthlyInventoryChartDataPoint,
-  type SelectSearchOption,
-  type ChangeOverTimeChartDataPoint,
+import type {
+  MonthlyInventoryChartDataPoint,
+  ChangeOverTimeChartDataPoint,
 } from "~/customTypes";
 
-export const getCountyChartData = async (
+export const s3SelectChartData = async (
   client: S3Client,
   stateId: string,
-  countyId: string
+  categoryId: string,
+  category: "county" | "zipcode"
 ) => {
-  const getCountyDataCSV = new SelectObjectContentCommand({
+  const primaryKey = category === "county" ? "county-data" : "zipcode-data";
+  const selectColumn = category === "county" ? "county_fips" : "postal_code";
+
+  const getDataCSV = new SelectObjectContentCommand({
     Bucket: process.env.BUCKET,
-    Key: `county-data/${stateId}.csv`,
+    Key: `${primaryKey}/${stateId}.csv`,
     ExpressionType: "SQL",
-    Expression: `SELECT * FROM S3Object s WHERE s."county_fips" = '${countyId}'`,
+    Expression: `SELECT * FROM S3Object s WHERE s."${selectColumn}" = '${categoryId}'`,
     InputSerialization: {
       CSV: {
         FileHeaderInfo: "USE",
@@ -38,13 +41,13 @@ export const getCountyChartData = async (
     },
   });
 
-  const countyDataCSVResponse = await client.send(getCountyDataCSV);
+  const dataCSVResponse = await client.send(getDataCSV);
 
   const decoder = new TextDecoder("utf-8");
   let data = "";
 
-  if (countyDataCSVResponse.Payload) {
-    for await (const event of countyDataCSVResponse.Payload) {
+  if (dataCSVResponse.Payload) {
+    for await (const event of dataCSVResponse.Payload) {
       if (event.Records && event.Records.Payload) {
         const chunk = event.Records.Payload;
         const decodedChunk = decoder.decode(chunk, { stream: true });
@@ -53,15 +56,15 @@ export const getCountyChartData = async (
     }
   }
 
-  const countyDataArray = csvToArray(data);
-  const countyInventoryData: MonthlyInventoryChartDataPoint[] = [];
-  const countyChangeOverTimeData: ChangeOverTimeChartDataPoint[] = [];
+  const dataArray = csvToArray(data);
+  const inventoryData: MonthlyInventoryChartDataPoint[] = [];
+  const changeOverTimeData: ChangeOverTimeChartDataPoint[] = [];
 
-  for (let i = countyDataArray.length - 1; i > 0; i--) {
-    const row = countyDataArray[i];
+  for (let i = dataArray.length - 1; i > 0; i--) {
+    const row = dataArray[i];
 
     if (row && row[0]) {
-      countyInventoryData.push({
+      inventoryData.push({
         date: formatMonthlyDate(row[0] || ""), // date
         medianListingPrice: Number(row[3]),
         medianDaysOnMarket: Number(row[9]),
@@ -74,7 +77,7 @@ export const getCountyChartData = async (
 
     // check to make sure percent over time changes are included
     if (row && row[4]) {
-      countyChangeOverTimeData.push({
+      changeOverTimeData.push({
         date: formatMonthlyDate(row[0] || ""),
         medianListingPriceMM: decimalToPercent(row[4]),
         medianListingPriceYY: decimalToPercent(row[5] || ""),
@@ -105,7 +108,7 @@ export const getCountyChartData = async (
   }
 
   return {
-    countyInventoryData,
-    countyChangeOverTimeData,
+    inventoryData,
+    changeOverTimeData,
   };
 };

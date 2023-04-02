@@ -71,8 +71,13 @@ const getZipcodeData = async () => {
     for (let i = 1; i < csvArray.length - 2; i++) {
       const row = csvArray[i];
 
-      if (row) {
+      if (row && row[2]) {
         const stateId = extractStateFromName(row[2]);
+
+        /**
+         * Zipcode names have the state names in them and an extra comma. These need to be wrapped in quotes to prevent the csv file from breaking.
+         */
+        row[2] = `"${row[2]}"`;
 
         if (stateId && stateHash[stateId]) {
           stateHash[stateId]?.push(row.join(","));
