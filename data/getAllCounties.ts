@@ -94,9 +94,13 @@ const getStateData = async () => {
     }
 
     for (const [key, value] of Object.entries(stateHash)) {
+      const sortedCounties = value.sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+
       outputFileSync(
         path.join(__dirname, `./county-list/${key}.json`),
-        JSON.stringify(value)
+        JSON.stringify(sortedCounties)
       );
     }
   } catch (err) {
