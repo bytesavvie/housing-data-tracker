@@ -57,10 +57,11 @@ export const s3SelectChartData = async (
   }
 
   const dataArray = csvToArray(data);
+
   const inventoryData: MonthlyInventoryChartDataPoint[] = [];
   const changeOverTimeData: ChangeOverTimeChartDataPoint[] = [];
 
-  for (let i = dataArray.length - 1; i > 0; i--) {
+  for (let i = dataArray.length - 1; i >= 0; i--) {
     const row = dataArray[i];
 
     if (row && row[0]) {

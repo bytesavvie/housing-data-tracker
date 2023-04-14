@@ -83,9 +83,12 @@ const getStateData = async () => {
     }
 
     for (const [key, value] of Object.entries(stateHash)) {
+      const sortedZipcodes = value.sort((a, b) => {
+        return Number(a.value) - Number(b.value);
+      });
       outputFileSync(
         path.join(__dirname, `./zipcode-list/${key}.json`),
-        JSON.stringify(value)
+        JSON.stringify(sortedZipcodes)
       );
     }
   } catch (err) {
