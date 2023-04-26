@@ -21,7 +21,7 @@ export const s3SelectChartData = async (
   const selectColumn = category === "county" ? "county_fips" : "postal_code";
 
   const getDataCSV = new SelectObjectContentCommand({
-    Bucket: process.env.BUCKET,
+    Bucket: process.env.MY_BUCKET,
     Key: `${primaryKey}/${stateId}.csv`,
     ExpressionType: "SQL",
     Expression: `SELECT * FROM S3Object s WHERE s."${selectColumn}" = '${categoryId}'`,

@@ -24,7 +24,7 @@ export const decimalToPercent = (numStr: string) => {
 
 export const getStateChartData = async (client: S3Client, stateId: string) => {
   const getStateDataCSV = new GetObjectCommand({
-    Bucket: process.env.BUCKET,
+    Bucket: process.env.MY_BUCKET,
     Key: `state-data/${stateId}.csv`,
   });
 
@@ -91,7 +91,7 @@ export const getSelectOptionsList: (
   listName: "county-list" | "zipcode-list"
 ) => Promise<SelectSearchOption[]> = async (client, stateId, listName) => {
   const getListOptions = new GetObjectCommand({
-    Bucket: process.env.BUCKET,
+    Bucket: process.env.MY_BUCKET,
     Key: `${listName}/${stateId}.json`,
   });
 
