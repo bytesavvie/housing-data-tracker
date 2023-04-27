@@ -8,9 +8,6 @@ import SelectSearch, {
   type SelectSearchProps,
 } from "react-select-search";
 
-// react-device-detect
-import { isMobile } from "react-device-detect";
-
 // Components
 import MonthlyInventoryChart from "../charts/MonthlyInventoryChart";
 import MobileMonthlyInventoryChart from "../charts/MobileMonthlyInventoryChartData";
@@ -59,6 +56,7 @@ export const changeOverTimeMetrics: {
 ];
 
 interface IProps {
+  isMobile: boolean;
   inventoryDataTitle: string;
   trendOverTimeTitle: string;
   inventoryData: MonthlyInventoryChartDataPoint[];
@@ -72,6 +70,7 @@ interface IProps {
 }
 
 const ChartDataSection: FC<IProps> = ({
+  isMobile,
   inventoryDataTitle,
   trendOverTimeTitle,
   inventoryData,

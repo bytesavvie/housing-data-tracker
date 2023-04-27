@@ -392,6 +392,7 @@ const StatePage: NextPage<IProps> = ({
                 </div>
                 {selectedCounty && countyInventoryData.length > 0 && (
                   <ChartDataSection
+                    isMobile={isMobile}
                     inventoryDataTitle={`County Inventory Data - ${extractCountyNameFromId()}`}
                     trendOverTimeTitle={`Trends Over Time - ${extractCountyNameFromId()}`}
                     inventoryData={countyInventoryData}
@@ -422,6 +423,7 @@ const StatePage: NextPage<IProps> = ({
                 </div>
                 {selectedZipcode && zipcodeInventoryData.length > 0 && (
                   <ChartDataSection
+                    isMobile={isMobile}
                     inventoryDataTitle={`Zipcode Inventory Data - ${selectedZipcode}`}
                     trendOverTimeTitle={`Trends Over Time - ${selectedZipcode}`}
                     inventoryData={zipcodeInventoryData}
