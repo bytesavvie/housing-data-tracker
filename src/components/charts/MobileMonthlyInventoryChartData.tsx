@@ -14,10 +14,7 @@ import {
 } from "recharts";
 
 // Custom Types
-import {
-  type MonthlyInventoryChartDataPoint,
-  type DisplayedChartData,
-} from "~/customTypes";
+import { type MonthlyInventoryChartDataPoint } from "~/customTypes";
 
 interface IProps {
   chartData: MonthlyInventoryChartDataPoint[];
@@ -28,34 +25,14 @@ const activeBtnCSS =
 const nonActiveBtnCSS =
   "border focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2 border-gray-600 text-gray-400 hover:text-white hover:bg-gray-600 focus:ring-gray-800";
 
-const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
+type chartDataKey = keyof MonthlyInventoryChartDataPoint;
+
+const MobileMonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
   const [displayedChartData, setDisplayedChartData] =
-    useState<DisplayedChartData>({
-      listingPrice: true,
-      totalListings: false,
-      newListings: false,
-      priceReduced: false,
-      daysOnMarket: false,
-      squareFeet: false,
-    });
+    useState<chartDataKey>("medianListingPrice");
 
-  const handleChartButtonClick = (key: keyof DisplayedChartData) => {
-    setDisplayedChartData((previousState) => ({
-      ...previousState,
-      [key]: !previousState[key],
-    }));
-  };
-
-  const hideListingsYAxis = () => {
-    if (
-      displayedChartData.totalListings ||
-      displayedChartData.newListings ||
-      displayedChartData.priceReduced
-    ) {
-      return false;
-    }
-
-    return true;
+  const handleChartButtonClick = (key: chartDataKey) => {
+    setDisplayedChartData(key);
   };
 
   return (
@@ -82,7 +59,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
 
             <YAxis
               yAxisId="price"
-              hide={!displayedChartData.listingPrice}
+              hide={displayedChartData !== "medianListingPrice"}
               domain={["auto", "auto"]}
               style={{ fill: "#f3f4f6" }}
               tickFormatter={(value: number) => {
@@ -99,7 +76,10 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
 
             <YAxis
               yAxisId="listings"
-              hide={hideListingsYAxis()}
+              hide={
+                displayedChartData !== "newListingCount" &&
+                displayedChartData !== "totalListingCount"
+              }
               style={{ fill: "#f3f4f6" }}
               tickFormatter={(value: number) => {
                 if (value >= 1000000) {
@@ -116,18 +96,16 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
             <YAxis
               yAxisId="feet"
               unit="ft"
-              orientation="right"
               style={{ fill: "#f3f4f6" }}
-              hide={!displayedChartData.squareFeet}
+              hide={displayedChartData !== "squareFeet"}
             />
 
             <YAxis
               yAxisId="days"
-              orientation="right"
               style={{ fill: "#f3f4f6" }}
               width={80}
               unit="days"
-              hide={!displayedChartData.daysOnMarket}
+              hide={displayedChartData !== "medianDaysOnMarket"}
             />
 
             <Tooltip
@@ -145,7 +123,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
               }}
             />
             <Legend />
-            {displayedChartData.listingPrice && (
+            {displayedChartData === "medianListingPrice" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -156,7 +134,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
                 dot={false}
               />
             )}
-            {displayedChartData.totalListings && (
+            {displayedChartData === "totalListingCount" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -167,7 +145,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
                 dot={false}
               />
             )}
-            {displayedChartData.newListings && (
+            {displayedChartData === "newListingCount" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -178,7 +156,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
                 dot={false}
               />
             )}
-            {displayedChartData.priceReduced && (
+            {displayedChartData === "priceReduced" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -189,7 +167,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
                 dot={false}
               />
             )}
-            {displayedChartData.daysOnMarket && (
+            {displayedChartData === "medianDaysOnMarket" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -200,7 +178,7 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
                 dot={false}
               />
             )}
-            {displayedChartData.squareFeet && (
+            {displayedChartData === "squareFeet" && (
               <Line
                 strokeWidth={4}
                 type="monotone"
@@ -217,31 +195,39 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
       <div className="text-center">
         <button
           className={
-            displayedChartData.listingPrice ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "medianListingPrice"
+              ? activeBtnCSS
+              : nonActiveBtnCSS
           }
-          onClick={() => handleChartButtonClick("listingPrice")}
+          onClick={() => handleChartButtonClick("medianListingPrice")}
         >
           Median List Price
         </button>
         <button
           className={
-            displayedChartData.totalListings ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "totalListingCount"
+              ? activeBtnCSS
+              : nonActiveBtnCSS
           }
-          onClick={() => handleChartButtonClick("totalListings")}
+          onClick={() => handleChartButtonClick("totalListingCount")}
         >
           Total Listing
         </button>
         <button
           className={
-            displayedChartData.newListings ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "newListingCount"
+              ? activeBtnCSS
+              : nonActiveBtnCSS
           }
-          onClick={() => handleChartButtonClick("newListings")}
+          onClick={() => handleChartButtonClick("newListingCount")}
         >
           New Listings
         </button>
         <button
           className={
-            displayedChartData.priceReduced ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "priceReduced"
+              ? activeBtnCSS
+              : nonActiveBtnCSS
           }
           onClick={() => handleChartButtonClick("priceReduced")}
         >
@@ -249,15 +235,17 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
         </button>
         <button
           className={
-            displayedChartData.daysOnMarket ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "medianDaysOnMarket"
+              ? activeBtnCSS
+              : nonActiveBtnCSS
           }
-          onClick={() => handleChartButtonClick("daysOnMarket")}
+          onClick={() => handleChartButtonClick("medianDaysOnMarket")}
         >
           Days on Market
         </button>
         <button
           className={
-            displayedChartData.squareFeet ? activeBtnCSS : nonActiveBtnCSS
+            displayedChartData === "squareFeet" ? activeBtnCSS : nonActiveBtnCSS
           }
           onClick={() => handleChartButtonClick("squareFeet")}
         >
@@ -268,4 +256,4 @@ const MonthlyInventoryChart: FC<IProps> = ({ chartData }) => {
   );
 };
 
-export default MonthlyInventoryChart;
+export default MobileMonthlyInventoryChart;

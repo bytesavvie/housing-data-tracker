@@ -8,8 +8,12 @@ import SelectSearch, {
   type SelectSearchProps,
 } from "react-select-search";
 
+// react-device-detect
+import { isMobile } from "react-device-detect";
+
 // Components
 import MonthlyInventoryChart from "../charts/MonthlyInventoryChart";
+import MobileMonthlyInventoryChart from "../charts/MobileMonthlyInventoryChartData";
 import PercentBarChart from "../charts/PercentBarChart";
 
 // Custom Types
@@ -81,8 +85,11 @@ const ChartDataSection: FC<IProps> = ({
         <h2 className="mb-4 text-center text-3xl text-white">
           {inventoryDataTitle}
         </h2>
-
-        <MonthlyInventoryChart chartData={inventoryData} />
+        {isMobile ? (
+          <MobileMonthlyInventoryChart chartData={inventoryData} />
+        ) : (
+          <MonthlyInventoryChart chartData={inventoryData} />
+        )}
       </section>
       <section>
         <h2 className="mb-4 text-center text-3xl text-white">

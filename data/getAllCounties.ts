@@ -63,7 +63,7 @@ const extractCountyName = (input: string | undefined) => {
   let countyName = input.split(",")[0];
   if (countyName) {
     countyName = countyName.trim();
-    return countyName;
+    return countyName.charAt(0).toUpperCase() + countyName.slice(1);
   }
 };
 

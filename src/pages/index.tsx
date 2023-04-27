@@ -14,7 +14,11 @@ import SelectSearch, {
   type SelectedOption,
 } from "react-select-search";
 
+// react-device-detect
+import { isMobile } from "react-device-detect";
+
 // components
+import MobileMonthlyInventoryChart from "~/components/charts/MobileMonthlyInventoryChartData";
 import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
 import PercentBarChart from "~/components/charts/PercentBarChart";
 
@@ -81,7 +85,13 @@ const Home: NextPage<IProps> = ({ usInventoryData, usChangeOverTimeData }) => {
               relator.com
             </a>
           </p>
-          <MonthlyInventoryChart chartData={usInventoryData} />
+          <div className="overflow-hidden">
+            {isMobile ? (
+              <MobileMonthlyInventoryChart chartData={usInventoryData} />
+            ) : (
+              <MonthlyInventoryChart chartData={usInventoryData} />
+            )}
+          </div>
         </section>
         <section>
           <h2 className="mb-4 text-center text-3xl text-white">
@@ -120,7 +130,7 @@ const Home: NextPage<IProps> = ({ usInventoryData, usChangeOverTimeData }) => {
             />
           </div>
           <PercentBarChart
-            containerClasses="lg:h-[450px] h-[400px]"
+            containerClasses="h-[300px] w-full sm:h-[400px] md:h-[500px]"
             chartData={usChangeOverTimeData}
             dataKey={
               selectedUSMetric.value as keyof ChangeOverTimeChartDataPoint

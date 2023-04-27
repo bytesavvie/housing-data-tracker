@@ -1,5 +1,5 @@
 // React
-import { FC, useContext } from "react";
+import type { FC } from "react";
 
 // Next
 import Link from "next/link";

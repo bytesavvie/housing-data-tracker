@@ -34,9 +34,14 @@ const PercentBarChart: FC<IProps> = ({
   return (
     <div className={containerClasses ? containerClasses : ""}>
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart width={730} height={250} data={chartData}>
+        <BarChart data={chartData}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="date" style={{ fill: "#f3f4f6" }} />
+          <XAxis
+            dataKey="date"
+            style={{ fill: "#f3f4f6" }}
+            minTickGap={10}
+            tickSize={10}
+          />
           <YAxis unit="%" style={{ fill: "#f3f4f6" }} />
           <Tooltip
             formatter={(value: number | string) => {
