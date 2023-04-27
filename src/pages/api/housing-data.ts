@@ -30,7 +30,7 @@ export default async function handler(
           return;
         } catch (err) {
           console.log("failed s3 error", err);
-          res.status(500).json({ message: "Unabled to get data." });
+          res.status(500).json({ message: err });
           return;
         }
       }
@@ -47,7 +47,7 @@ export default async function handler(
           return;
         } catch (err) {
           console.log("failed s3 error", err);
-          res.status(500).json({ message: "Unabled to get data." });
+          res.status(500).json({ message: err });
           return;
         }
       }
