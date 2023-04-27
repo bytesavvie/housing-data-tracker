@@ -15,7 +15,8 @@ import SelectSearch, {
 } from "react-select-search";
 
 // react-device-detect
-import { isMobile } from "react-device-detect";
+// import { isMobile } from "react-device-detect";
+const isMobile = false;
 
 // components
 import MobileMonthlyInventoryChart from "~/components/charts/MobileMonthlyInventoryChartData";

@@ -16,7 +16,8 @@ import SelectSearch, {
 import axios from "axios";
 
 // react-device-detect
-import { isMobile } from "react-device-detect";
+// import { isMobile } from "react-device-detect";
+const isMobile = false;
 
 // Components
 import USMap from "../../components/maps/USMap";
