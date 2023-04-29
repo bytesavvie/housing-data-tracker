@@ -10,7 +10,6 @@ import SelectSearch, {
 
 // Components
 import MonthlyInventoryChart from "../charts/MonthlyInventoryChart";
-import MobileMonthlyInventoryChart from "../charts/MobileMonthlyInventoryChartData";
 import PercentBarChart from "../charts/PercentBarChart";
 
 // Custom Types
@@ -56,7 +55,6 @@ export const changeOverTimeMetrics: {
 ];
 
 interface IProps {
-  isMobile: boolean;
   inventoryDataTitle: string;
   trendOverTimeTitle: string;
   inventoryData: MonthlyInventoryChartDataPoint[];
@@ -70,7 +68,6 @@ interface IProps {
 }
 
 const ChartDataSection: FC<IProps> = ({
-  isMobile,
   inventoryDataTitle,
   trendOverTimeTitle,
   inventoryData,
@@ -84,11 +81,8 @@ const ChartDataSection: FC<IProps> = ({
         <h2 className="mb-4 text-center text-3xl text-white">
           {inventoryDataTitle}
         </h2>
-        {isMobile ? (
-          <MobileMonthlyInventoryChart chartData={inventoryData} />
-        ) : (
-          <MonthlyInventoryChart chartData={inventoryData} />
-        )}
+
+        <MonthlyInventoryChart chartData={inventoryData} />
       </section>
       <section>
         <h2 className="mb-4 text-center text-3xl text-white">

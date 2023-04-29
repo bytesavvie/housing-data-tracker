@@ -1,5 +1,5 @@
 // React
-import type { FC } from "react";
+import type { FC, Dispatch, SetStateAction } from "react";
 
 // Next
 import Link from "next/link";
@@ -13,20 +13,22 @@ const nonActiveNavItemCSS =
 
 interface IProps {
   isOpen: boolean;
+  setIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const MobileNavMenu: FC<IProps> = ({ isOpen }) => {
+const MobileNavMenu: FC<IProps> = ({ isOpen, setIsOpen }) => {
   const router = useRouter();
 
   return (
     <div className="md:hidden " id="navbar-default">
       <ul
         className={`overflow-hidden text-center transition-all ${
-          isOpen ? "max-h-screen" : "max-h-0"
+          isOpen ? "h-28" : "h-0"
         }`}
       >
         <li className="mt-3 mb-2">
           <Link
+            onClick={() => setIsOpen(false)}
             href="/"
             className={
               router?.pathname === "/" ? activeNavItemCSS : nonActiveNavItemCSS
@@ -37,6 +39,7 @@ const MobileNavMenu: FC<IProps> = ({ isOpen }) => {
         </li>
         <li>
           <Link
+            onClick={() => setIsOpen(false)}
             href={`/state`}
             className={
               router?.pathname.includes("/state")

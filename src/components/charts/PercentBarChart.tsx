@@ -42,7 +42,7 @@ const PercentBarChart: FC<IProps> = ({
             minTickGap={10}
             tickSize={10}
           />
-          <YAxis unit="%" style={{ fill: "#f3f4f6" }} />
+          <YAxis width={50} unit="%" style={{ fill: "#f3f4f6" }} />
           <Tooltip
             formatter={(value: number | string) => {
               return `${value}%`;

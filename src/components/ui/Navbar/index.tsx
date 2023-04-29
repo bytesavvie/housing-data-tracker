@@ -52,7 +52,7 @@ const Navbar = () => {
         </button>
         <NavMenu />
       </div>
-      <MobileNavMenu isOpen={isOpen} />
+      <MobileNavMenu isOpen={isOpen} setIsOpen={setIsOpen} />
     </nav>
   );
 };

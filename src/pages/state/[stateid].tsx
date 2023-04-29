@@ -15,14 +15,9 @@ import SelectSearch, {
 // axios
 import axios from "axios";
 
-// react-device-detect
-// import { isMobile } from "react-device-detect";
-const isMobile = false;
-
 // Components
 import USMap from "../../components/maps/USMap";
 import MonthlyInventoryChart from "~/components/charts/MonthlyInventoryChart";
-import MobileMonthlyInventoryChart from "~/components/charts/MobileMonthlyInventoryChartData";
 import PercentBarChart from "~/components/charts/PercentBarChart";
 import ChartDataSection from "~/components/ui/ChartDataSection";
 
@@ -258,11 +253,7 @@ const StatePage: NextPage<IProps> = ({
                 relator.com
               </a>
             </p>
-            {isMobile ? (
-              <MobileMonthlyInventoryChart chartData={stateInventoryData} />
-            ) : (
-              <MonthlyInventoryChart chartData={stateInventoryData} />
-            )}
+            <MonthlyInventoryChart chartData={stateInventoryData} />
           </section>
           <section className="mb-16">
             <h2 className="mb-4 text-center text-3xl text-white">
@@ -393,7 +384,6 @@ const StatePage: NextPage<IProps> = ({
                 </div>
                 {selectedCounty && countyInventoryData.length > 0 && (
                   <ChartDataSection
-                    isMobile={isMobile}
                     inventoryDataTitle={`County Inventory Data - ${extractCountyNameFromId()}`}
                     trendOverTimeTitle={`Trends Over Time - ${extractCountyNameFromId()}`}
                     inventoryData={countyInventoryData}
@@ -424,7 +414,6 @@ const StatePage: NextPage<IProps> = ({
                 </div>
                 {selectedZipcode && zipcodeInventoryData.length > 0 && (
                   <ChartDataSection
-                    isMobile={isMobile}
                     inventoryDataTitle={`Zipcode Inventory Data - ${selectedZipcode}`}
                     trendOverTimeTitle={`Trends Over Time - ${selectedZipcode}`}
                     inventoryData={zipcodeInventoryData}
