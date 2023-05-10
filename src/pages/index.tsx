@@ -199,5 +199,6 @@ export const getStaticProps = async () => {
       usInventoryData: usInventoryData,
       usChangeOverTimeData: usChangeOverTimeData,
     },
+    revalidate: 60 * 60 * 24, // Revalidate once every day
   };
 };

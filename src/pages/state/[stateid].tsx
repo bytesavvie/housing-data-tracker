@@ -463,6 +463,7 @@ export const getStaticProps: GetStaticProps = async (context) => {
       countyOptions,
       zipcodeOptions,
     },
+    revalidate: 60 * 60 * 24, // Revalidate once every day
   };
 };
 
